@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+    "crypto/sha256"
+    "encoding/hex"
 )
 
 type Memory struct{
@@ -19,19 +21,37 @@ func main(){
 
 	fmt.Println("今天的状态是:")
 	for day,m := range diary {
-		fmt.Printf("今天是第%d天|日期%s|我今天%s\n ",day,m.date,m.Context)
+
+		record := fmt.Sprintf("%d%s%s",day,m.date,m.Context)
+		h := sha256.New()
+		h.Write([]byte(record))
+
+		hash := h.Sum(nil)
+		hashString := hex.EncodeToString(hash)
+
+		fmt.Printf("\033[35m第 %d 天\033[0m | 内容: %s | \033[32m指纹: %s\033[0m\n", 
+                   day, m.Context, hashString)
 	}
 	 
-	file,err := os.Create("love.txt")
+	aa,err := os.Create("love.txt")
 	if err != nil{
 		fmt.Println("Error..",err)
 		return
 	}
-	defer file.Close()
+	defer aa.Close()
 
 	for day,m := range diary {
-		line := fmt.Sprintf("今天是第%d天|日期%s|我今天%s\n ",day,m.date,m.Context)
-	    file.WriteString(line)
+
+		record := fmt.Sprintf("%d%s%s",day,m.date,m.Context)
+		g := sha256.New()
+		g.Write([]byte(record))
+
+		hash := g.Sum(nil)
+		hashString := hex.EncodeToString(hash)
+
+		line := fmt.Sprintf("第 %d 天 | 内容: %s | 指纹: %s\n", 
+        day, m.Context, hashString)
+	    aa.WriteString(line)
 		}
 
 		fmt.Printf("奇迹发生了！")
